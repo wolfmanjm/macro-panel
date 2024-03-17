@@ -1,0 +1,42 @@
+[deck1]
+name = "deck 1"
+buttons = [
+    { index = 0, name = "Mac 0", text = "Macro zero", color = "red" },
+    { index = 1, name = "Mac 1", text = "Macro one", color = "blue" },
+    { index = 2, name = "Mac 2", text = "Macro two", color = "green" },
+    { index = 3, name = "Mac 3", text = "Macro three" },
+    { index = 4, name = "Mac 4", text = "Macro four" },
+    { index = 5, name = "Mac 5", text = "Macro five" },
+    { index = 6, name = "Mac 6", text = "Macro six" },
+    { index = 7, name = "Mac 7", text = "Macro seven" },
+    { index = 8, name = "Mac 8", text = "Macro eight" },
+    { index = 9, name = "Mac 9", text = "Macro nine" },
+    { index = 10, name = "Mac A", text = "Macro ten" },
+    { index = 11, name = "Mac B", text = "Macro eleven" },
+    { index = 12, name = "Mac C", text = "Macro twelve" },
+    { index = 13, name = "Mac D", text = "Macro thirteen" },
+    { index = 14, name = "Mac E", text = "Macro fourteen" },
+    { index = 15, name = "Mac F", text = "Macro fifteen" }
+]
+
+[deck2]
+name = "CNC"
+buttons = [
+    { index = 0, name = "Run", text = "Macro zero", color = "red" },
+    { index = 1, name = "Home", text = "Macro one", color = "blue" },
+    { index = 2, name = "Origin", text = "Macro two", color = "green" },
+    { index = 3, name = "Half", text = "Macro three" },
+    { index = 4, name = "Probe", text = "Macro four" },
+    { index = 5, name = "Safe Z", text = "Macro five" },
+    { index = 6, name = "Spindle", text = "Macro six" },
+    { index = 7, name = "", text = "Macro seven" },
+    { index = 8, name = "", text = "Macro eight" },
+    { index = 9, name = "", text = "Macro nine" },
+    { index = 10, name = "", text = "Macro ten" },
+    { index = 11, name = "", text = "Macro eleven" },
+    { index = 12, name = "X", text = "Macro twelve" },
+    { index = 13, name = "Y", text = "Macro thirteen" },
+    { index = 14, name = "Z", text = "Macro fourteen" },
+    { index = 15, name = "All", text = "Macro fifteen" }
+]
+

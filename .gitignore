@@ -32,3 +32,5 @@
 *.app
 
 .pio
+TFT_graphicstest_one_lib.ino
+stepper_analyzer.pdf
