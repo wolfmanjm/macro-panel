@@ -32,11 +32,35 @@ buttons = [
     { row = 0, col = 3, name = "Half", action = "Macro three" },
     { row = 0, col = 4, name = "Probe", action = "Macro four" },
     { row = 1, col = 0, name = "Safe Z", action = "Macro five" },
-    { row = 1, col = 1, name = "Spindle", action = "Macro six" },
+    { row = 1, col = 1, name = "Spindle", text_size = 1, action = "Macro six" },
 
-    { row = 3, col = 0, name = "X", text_size = 2, action = "Set X" },
-    { row = 3, col = 1, name = "Y", text_size = 2, action = "Set Y" },
-    { row = 3, col = 2, name = "Z", text_size = 2, action = "Set Z" },
-    { row = 3, col = 3, name = "All", text_size = 2, action = "Set All" }
+    { row = 3, col = 0, name = "X", text_size = 3, action = "Set X" },
+    { row = 3, col = 1, name = "Y", text_size = 3, action = "Set Y" },
+    { row = 3, col = 2, name = "Z", text_size = 3, action = "Set Z" },
+    { row = 3, col = 3, name = "All", text_size = 3, action = "Set All" }
 ]
 
+[deck3]
+name = "KIM 1"
+buttons = [
+    { row = 0, col = 0, name = "0", action = "0" },
+    { row = 0, col = 1, name = "1", action = "1" },
+    { row = 0, col = 2, name = "2", action = "2" },
+    { row = 0, col = 3, name = "3", action = "3" },
+    { row = 0, col = 4, name = "Addr", action = "addr", color = "red" },
+    { row = 1, col = 0, name = "4", action = "4" },
+    { row = 1, col = 1, name = "5", action = "5" },
+    { row = 1, col = 2, name = "6", action = "6" },
+    { row = 1, col = 3, name = "7", action = "7" },
+    { row = 1, col = 4, name = "Data", action = "data", color = "red" },
+    { row = 2, col = 0, name = "8", action = "8" },
+    { row = 2, col = 1, name = "9", action = "9" },
+    { row = 2, col = 2, name = "A", action = "A" },
+    { row = 2, col = 3, name = "B", action = "B" },
+    { row = 2, col = 4, name = "Load", action = "load", color = "red" },
+    { row = 3, col = 0, name = "C", action = "C" },
+    { row = 3, col = 1, name = "D", action = "D" },
+    { row = 3, col = 2, name = "E", action = "E" },
+    { row = 3, col = 3, name = "F", action = "F" },
+    { row = 3, col = 4, name = "Run", action = "run", color = "red" }
+]

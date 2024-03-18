@@ -18,7 +18,7 @@ TFT_eSPI tft = TFT_eSPI();
 #define BUTTON_H 60
 #define BUTTON_SPACING_X 10
 #define BUTTON_SPACING_Y 10
-#define BUTTON_TEXTSIZE 1
+#define BUTTON_TEXTSIZE 2
 
 typedef struct {
     TFT_eSPI_Button button;
@@ -29,13 +29,14 @@ typedef struct {
     uint8_t text_size;
 } keys_t;
 
+// default maximum number of rows and columns
 const uint8_t nrows= 4;
 const uint8_t ncolumns= 5;
 
 // points to current deck
 std::vector<keys_t> *buttons;
 
-#define NDECKS 2
+#define NDECKS 3
 std::vector<keys_t> decks[NDECKS];
 int current_deck= 0;
 
@@ -176,6 +177,8 @@ bool read_config()
                 if(++current_deck >= NDECKS) break;
             }
             ok = true;
+
+            Serial.printf("Loaded %d decks\n", current_deck);
             current_deck= 0;
 
         } else {
@@ -206,7 +209,7 @@ void setup()
     tft.setRotation(3);
     tft.fillScreen(TFT_BLACK);
 
-    // setup from config. This will load the decks
+    // setup from config. This will load the decksMacro three
     if(!read_config()) {
         Serial.printf("Failed to read the config file\n");
     }
