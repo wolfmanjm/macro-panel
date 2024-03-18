@@ -9,11 +9,9 @@
 
 // The FT6206 uses hardware I2C (SCL/SDA)
 Adafruit_FT6206 ts = Adafruit_FT6206();
-
-// 320x480
 TFT_eSPI tft = TFT_eSPI();
 
-// 320x480
+// 320x480 for 5 columns by 4 rows of buttons
 #define BUTTON_X 64
 #define BUTTON_Y 60
 #define BUTTON_W 80
@@ -23,90 +21,50 @@ TFT_eSPI tft = TFT_eSPI();
 #define BUTTON_TEXTSIZE 1
 
 typedef struct {
+    TFT_eSPI_Button button;
     std::string name;
     std::string action;
-    TFT_eSPI_Button *button;
     uint16_t color;
-    bool display;
+    uint8_t row, col;
+    uint8_t text_size;
 } keys_t;
 
-const uint8_t rows= 4;
-const uint8_t columns= 5;
-keys_t buttons[rows][columns];
+const uint8_t nrows= 4;
+const uint8_t ncolumns= 5;
 
-const char *deck1[rows][columns] = {
-    {"Mac 0",  "Mac 1", "Mac 2", "Mac 3", "Mac 4"},
-    {"Mac 5",  "Mac 6", "Mac 7", "Mac 8", "Mac 9"},
-    {"Mac A",  "Mac B", "Mac C", "Mac D", "Mac E"},
-    {"Mac F",  "Mac G", "Mac H", "Mac I", "Mac J"}
-};
+// points to current deck
+std::vector<keys_t> *buttons;
 
-const char *deck2[rows][columns] = {
-    {"Deck2 0", "Deck2 1", "Deck2 2", "Deck2 3", "Deck2 4"},
-    {"Deck2 5", "Deck2 6", "Deck2 7", "Deck2 8", "Deck2 9"},
-    {"Deck2 A", "Deck2 B", "Deck2 C", "Deck2 D",  nullptr},
-    {"Deck2 F",  nullptr,  "Deck2 G",  nullptr,  "Deck2 I"}
-};
-
-void create_buttons()
-{
-    // create buttons
-    for (uint8_t row = 0; row < rows; row++) {
-        for (uint8_t col = 0; col < columns; col++) {
-            TFT_eSPI_Button *b= new TFT_eSPI_Button;
-            buttons[row][col].button = b;
-            buttons[row][col].name= deck1[row][col];
-            buttons[row][col].action= buttons[row][col].name;
-            buttons[row][col].color= TFT_BLUE;
-            buttons[row][col].display= true;
-            // x, y, w, h, outline, fill, text
-            b->initButton(&tft, BUTTON_X + col * (BUTTON_W + BUTTON_SPACING_X),
-                                                BUTTON_Y + row * (BUTTON_H + BUTTON_SPACING_Y),
-                                                BUTTON_W, BUTTON_H,
-                                                TFT_WHITE,
-                                                buttons[row][col].color, // button color
-                                                TFT_WHITE,
-                                                (char *)buttons[row][col].name.c_str(),
-                                                BUTTON_TEXTSIZE);
-            b->drawButton();
-        }
-    }
-}
+#define NDECKS 2
+std::vector<keys_t> decks[NDECKS];
+int current_deck= 0;
 
 void update_buttons()
 {
     // update buttons
-    for (uint8_t row = 0; row < rows; row++) {
-        for (uint8_t col = 0; col < columns; col++) {
-            if(buttons[row][col].display) {
-                TFT_eSPI_Button *b= buttons[row][col].button;
-                // x, y, w, h, outline, fill, text
-                b->initButton(&tft, BUTTON_X + col * (BUTTON_W + BUTTON_SPACING_X),
-                                                    BUTTON_Y + row * (BUTTON_H + BUTTON_SPACING_Y),
-                                                    BUTTON_W, BUTTON_H,
-                                                    TFT_WHITE,
-                                                    buttons[row][col].color, // button color
-                                                    TFT_WHITE,
-                                                    (char *)buttons[row][col].name.c_str(),
-                                                    BUTTON_TEXTSIZE);
-                b->drawButton();
-            }
-        }
+    for( auto &b : *buttons) {
+        uint8_t row= b.row;
+        uint8_t col= b.col;
+        // x, y, w, h, outline, fill, text, textsize
+        b.button.initButton(&tft, BUTTON_X + col * (BUTTON_W + BUTTON_SPACING_X),
+                                                BUTTON_Y + row * (BUTTON_H + BUTTON_SPACING_Y),
+                                                BUTTON_W, BUTTON_H,
+                                                TFT_WHITE,
+                                                b.color, // button color
+                                                TFT_WHITE,
+                                                (char *)b.name.c_str(),
+                                                b.text_size);
+        b.button.drawButton();
     }
 }
 
-void swap_deck(const char *deck[][columns])
+void swap_deck(int d)
 {
-    for (uint8_t row = 0; row < rows; row++) {
-        for (uint8_t col = 0; col < columns; col++) {
-            if(deck[row][col] != nullptr) {
-                buttons[row][col].name= deck[row][col];
-                buttons[row][col].display= true;
-            }else{
-                buttons[row][col].display = false;
-            }
-        }
-    }
+    if(d >= NDECKS) d= NDECKS-1;
+    else if(d < 0) d= 0;
+
+    buttons= &decks[d];
+    current_deck= d;
     update_buttons();
 }
 
@@ -161,29 +119,64 @@ bool read_config()
                     if(s) {
                         for (int n = 0; n < s->size(); ++n) {
                             auto tbl = s->getTable(n);
-                            auto index = tbl->getInt("index");
+                            auto row = tbl->getInt("row");
+                            auto col = tbl->getInt("col");
                             auto name = tbl->getString("name");
-                            auto text = tbl->getString("text");
-                            if(!index.first || !name.first || !text.first) {
-                                Serial.printf("    Error %d - missing index, name or text\n", n);
+                            auto action = tbl->getString("action");
+                            if(!row.first || !col.first || !name.first || !action.first) {
+                                Serial.printf("    Error %d - missing row, col, name or action\n", n);
                                 continue;
                             }
-                            uint32_t idx = (uint32_t)index.second;
+                            uint32_t r = (uint32_t)row.second;
+                            uint32_t c = (uint32_t)col.second;
 
-                            Serial.printf("    idx: %ld, name: %s, text: %s", idx, name.second.c_str(), text.second.c_str());
+                            if(r >= nrows || c >= ncolumns) {
+                                Serial.printf("    Error %d - row or col out of range\n", n);
+                                continue;
+                            }
+                            Serial.printf("    row: %ld, col: %ld, name: %s, action: %s", r, c, name.second.c_str(), action.second.c_str());
+
+                            // setup the key data
+                            keys_t key;
+                            key.row = r;
+                            key.col = c;
+                            key.name = name.second;
+                            key.action = action.second;
+                            key.color = TFT_BLUE;
+                            key.text_size = BUTTON_TEXTSIZE;
+
                             // optional
                             auto color = tbl->getString("color");
                             if(color.first) {
                                 Serial.printf(", color: %s", color.second.c_str());
+                                if(color.second == "red") key.color = TFT_RED;
+                                else if(color.second == "blue") key.color = TFT_BLUE;
+                                else if(color.second == "green") key.color = TFT_GREEN;
+                                else {
+                                    Serial.printf("    Warning unknown color: %s", color.second.c_str());
+                                    key.color = TFT_BLUE;
+                                }
                             }
+                            auto ts = tbl->getInt("text_size");
+                            if(ts.first) {
+                                Serial.printf(", text_size: %ld", (uint32_t)ts.second);
+                                key.text_size = ts.second;
+                            }
+
                             Serial.printf("\n");
+
+                            // store in current deck
+                            decks[current_deck].push_back(key);
                         }
+
                     } else {
                         Serial.printf("  Failed to get buttons\n");
                     }
                 }
+                if(++current_deck >= NDECKS) break;
             }
             ok = true;
+            current_deck= 0;
 
         } else {
             Serial.println("Failed to open config.toml");
@@ -213,11 +206,13 @@ void setup()
     tft.setRotation(3);
     tft.fillScreen(TFT_BLACK);
 
+    // setup from config. This will load the decks
     if(!read_config()) {
         Serial.printf("Failed to read the config file\n");
     }
 
-    create_buttons();
+    // use data from first deck
+    swap_deck(current_deck);
 
     Keyboard.begin();
 }
@@ -264,18 +259,17 @@ void loop(void)
         if(p.z) {
             if(was_down) {
                 int dy = lst_y - p.y;
-                if(abs(dy) > tft.height() / 2) {
+                if(abs(dy) > tft.height() / 4) {
                     // swipe detected
                     Serial.printf("Swiped %d\n", dy);
                     lst_y = p.y;
                     tft.fillScreen(TFT_BLACK);
                     if(dy > 0) {
                         // swiped up
-                        swap_deck(deck1);
-
+                        swap_deck(--current_deck);
                     } else {
                         // swiped down
-                        swap_deck(deck2);
+                        swap_deck(++current_deck);
                     }
                     return;
                 }
@@ -299,34 +293,25 @@ void loop(void)
     }
 
     // go thru all the buttons, checking if they were pressed
-    for (uint8_t row = 0; row < rows; row++) {
-        for (uint8_t col = 0; col < columns; col++) {
-            if(!buttons[row][col].display) continue;
-            TFT_eSPI_Button *b= buttons[row][col].button;
-            if (b->contains(p.x, p.y)) {
-                if(!b->isPressed()) {
-                    Serial.printf("Pressing: %d\n", b);
-                    b->press(true);  // tell the button it is pressed
-                }
-            } else {
-                b->press(false);  // tell the button it is NOT pressed
+    for( auto &b : *buttons) {
+        if (b.button.contains(p.x, p.y)) {
+            if(!b.button.isPressed()) {
+                Serial.printf("Pressing: %s\n", b.name.c_str());
+                b.button.press(true);  // tell the button it is pressed
             }
+        } else {
+            b.button.press(false);  // tell the button it is NOT pressed
         }
     }
 
     // now we can ask the buttons if their state has changed
-    for (uint8_t row = 0; row < rows; row++) {
-        for (uint8_t col = 0; col < columns; col++) {
-            if(!buttons[row][col].display) continue;
-            TFT_eSPI_Button *b= buttons[row][col].button;
-            if (b->justReleased()) {
-                Serial.printf("Released: %d\n", b);
-                b->drawButton();  // draw normal
-                Keyboard.write((const uint8_t*)buttons[row][col].action.c_str(), buttons[row][col].action.size());
-
-            } else if (b->justPressed()) {
-                b->drawButton(true);  // draw invert!
-            }
+    for( auto &b : *buttons) {
+        if (b.button.justReleased()) {
+            Serial.printf("Released: %s\n", b.name.c_str());
+            b.button.drawButton();  // draw normal
+            Keyboard.write((const uint8_t*)b.action.c_str(), b.action.size());
+        } else if (b.button.justPressed()) {
+            b.button.drawButton(true);  // draw invert!
         }
     }
 

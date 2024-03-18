@@ -1,42 +1,42 @@
 [deck1]
 name = "deck 1"
 buttons = [
-    { index = 0, name = "Mac 0", text = "Macro zero", color = "red" },
-    { index = 1, name = "Mac 1", text = "Macro one", color = "blue" },
-    { index = 2, name = "Mac 2", text = "Macro two", color = "green" },
-    { index = 3, name = "Mac 3", text = "Macro three" },
-    { index = 4, name = "Mac 4", text = "Macro four" },
-    { index = 5, name = "Mac 5", text = "Macro five" },
-    { index = 6, name = "Mac 6", text = "Macro six" },
-    { index = 7, name = "Mac 7", text = "Macro seven" },
-    { index = 8, name = "Mac 8", text = "Macro eight" },
-    { index = 9, name = "Mac 9", text = "Macro nine" },
-    { index = 10, name = "Mac A", text = "Macro ten" },
-    { index = 11, name = "Mac B", text = "Macro eleven" },
-    { index = 12, name = "Mac C", text = "Macro twelve" },
-    { index = 13, name = "Mac D", text = "Macro thirteen" },
-    { index = 14, name = "Mac E", text = "Macro fourteen" },
-    { index = 15, name = "Mac F", text = "Macro fifteen" }
+    { row = 0, col = 0, name = "Mac 0", action = "Macro zero" },
+    { row = 0, col = 1, name = "Mac 1", action = "Macro one" },
+    { row = 0, col = 2, name = "Mac 2", action = "Macro two" },
+    { row = 0, col = 3, name = "Mac 3", action = "Macro three" },
+    { row = 0, col = 4, name = "Mac 4", action = "Macro four", color = "red" },
+    { row = 1, col = 0, name = "Mac 5", action = "Macro five" },
+    { row = 1, col = 1, name = "Mac 6", action = "Macro six" },
+    { row = 1, col = 2, name = "Mac 7", action = "Macro seven" },
+    { row = 1, col = 3, name = "Mac 8", action = "Macro eight" },
+    { row = 1, col = 4, name = "Mac 9", action = "Macro nine", color = "red" },
+    { row = 2, col = 0, name = "Mac A", action = "Macro ten" },
+    { row = 2, col = 1, name = "Mac B", action = "Macro eleven" },
+    { row = 2, col = 2, name = "Mac C", action = "Macro twelve" },
+    { row = 2, col = 3, name = "Mac D", action = "Macro thirteen" },
+    { row = 2, col = 4, name = "Mac E", action = "Macro fourteen", color = "red" },
+    { row = 3, col = 0, name = "Mac F", action = "Macro fifteen" },
+    { row = 3, col = 1, name = "Mac G", action = "Macro sixteen" },
+    { row = 3, col = 2, name = "Mac H", action = "Macro seventeen" },
+    { row = 3, col = 3, name = "Mac I", action = "Macro eighteen" },
+    { row = 3, col = 4, name = "Mac J", action = "Macro nineteen", color = "red" }
 ]
 
 [deck2]
 name = "CNC"
 buttons = [
-    { index = 0, name = "Run", text = "Macro zero", color = "red" },
-    { index = 1, name = "Home", text = "Macro one", color = "blue" },
-    { index = 2, name = "Origin", text = "Macro two", color = "green" },
-    { index = 3, name = "Half", text = "Macro three" },
-    { index = 4, name = "Probe", text = "Macro four" },
-    { index = 5, name = "Safe Z", text = "Macro five" },
-    { index = 6, name = "Spindle", text = "Macro six" },
-    { index = 7, name = "", text = "Macro seven" },
-    { index = 8, name = "", text = "Macro eight" },
-    { index = 9, name = "", text = "Macro nine" },
-    { index = 10, name = "", text = "Macro ten" },
-    { index = 11, name = "", text = "Macro eleven" },
-    { index = 12, name = "X", text = "Macro twelve" },
-    { index = 13, name = "Y", text = "Macro thirteen" },
-    { index = 14, name = "Z", text = "Macro fourteen" },
-    { index = 15, name = "All", text = "Macro fifteen" }
+    { row = 0, col = 0, name = "Run", action = "Macro zero", color = "red" },
+    { row = 0, col = 1, name = "Home", action = "Macro one", color = "blue" },
+    { row = 0, col = 2, name = "Origin", action = "Macro two", color = "green" },
+    { row = 0, col = 3, name = "Half", action = "Macro three" },
+    { row = 0, col = 4, name = "Probe", action = "Macro four" },
+    { row = 1, col = 0, name = "Safe Z", action = "Macro five" },
+    { row = 1, col = 1, name = "Spindle", action = "Macro six" },
+
+    { row = 3, col = 0, name = "X", text_size = 2, action = "Set X" },
+    { row = 3, col = 1, name = "Y", text_size = 2, action = "Set Y" },
+    { row = 3, col = 2, name = "Z", text_size = 2, action = "Set Z" },
+    { row = 3, col = 3, name = "All", text_size = 2, action = "Set All" }
 ]
 
