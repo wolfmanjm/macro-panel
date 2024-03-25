@@ -1,7 +1,10 @@
 #include <SPI.h>
 #include <Wire.h>      // this is needed even tho we aren't using it
-//#include "tinyflash.h"
 
+#define USE_FLASH
+#ifdef USE_FLASH
+#include "tinyflash.h"
+#endif
 
 #ifdef TEENSY41
 #include <ILI9341_t3.h>
@@ -27,9 +30,9 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 #elif defined(PICO)
 #include "TFT_eSPI.h"
 
-// #define SCLK 2
-// #define MOSI 7 // 3
-// #define MISO 4
+#define SCLK 2
+#define MOSI 7 // 3
+#define MISO 4
 // #define TFT_CS 5
 // #define TFT_DC  6
 // #define TFT_RST 10 // 7
@@ -37,6 +40,10 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 #define FLASH_CS 9
 TFT_eSPI tft = TFT_eSPI();
 
+#ifdef USE_FLASH
+TinyFlash flash(FLASH_CS);
+static uint32_t capacity = 0;
+#endif
 
 #else
 #error "Not a recognized board"
@@ -158,6 +165,9 @@ TFT_eSPI_Button buttons[16];
 Adafruit_GFX_Button buttons[16];
 #endif
 
+//#define FLASHCAL
+//#define VERIFYCAL
+
 void setup(void)
 {
     Serial.begin(115200);
@@ -165,10 +175,101 @@ void setup(void)
     Serial.println("Starting macro panel");
 
 #ifdef PICO
-    // SPI.setRX(MISO);
-    // SPI.setTX(MOSI);
-    // SPI.setSCK(SCLK);
-    // SPI.setCS(TFT_CS);
+#ifdef USE_FLASH
+    SPI.setRX(MISO);
+    SPI.setTX(MOSI);
+    SPI.setSCK(SCLK);
+    // Setup flash that is on the LCD board
+    capacity = flash.begin();
+    Serial.printf("Flash capacity = %d\n", capacity);     // Chip size to host
+    if(capacity <= 0) {
+        Serial.println("Bad flash");
+    }
+
+#ifdef FLASHCAL
+    Serial.println("FLASHING CALIBRATION");
+    uint32_t address = 0;
+    if(!flash.eraseSector(address)) {
+        Serial.println("ERROR ERASEING Sector FLASH");
+        while(1) ;
+    }
+
+    uint8_t buffer[256];
+    buffer[0] = 0xBE;
+    buffer[1] = 0xAF;
+
+    memcpy(&buffer[2], calData, 5*sizeof(uint16_t));
+    // writes 256 bytes
+    if(flash.writePage(address, buffer)) {
+        Serial.println("Flashed OK");
+    } else {
+        Serial.println("Flash failed");
+    }
+
+#elif defined(VERIFYCAL)
+    Serial.println("VERIFYING CALIBRATION");
+    bool ok= true;
+    while(1) {
+        if(!flash.beginRead(0)) {
+            Serial.println("flash.beginread failed");
+            ok= false;
+            break;
+        }
+
+        uint8_t buffer[256];
+        buffer[0] = flash.readNextByte();
+        buffer[1] = flash.readNextByte();
+        if(buffer[0] != 0xBE || buffer[1] != 0xAF) {
+            Serial.printf("ID incorrect: %02X %02X\n", buffer[0], buffer[1]);
+            ok= false;
+            break;
+        }
+
+        memcpy(buffer, calData, 5*sizeof(uint16_t));
+        for (int i = 0; i < 5*sizeof(uint16_t); ++i) {
+            uint8_t u= flash.readNextByte();
+            if(u != buffer[i]) {
+                Serial.printf("Data %d incorrect: expected %02X, got %02X\n", i, buffer[i], u);
+                ok = false;
+            }
+        }
+        break;
+    }
+
+    flash.endRead();
+    Serial.printf("Verified %s\n", ok?"OK":"Failed");
+#else
+    // loads cal data from the flash
+    Serial.println("Loading calibration from flash");
+    bool ok= true;
+    while(1) {
+        if(!flash.beginRead(0)) {
+            Serial.println("flash.beginread failed");
+            ok= false;
+            break;
+        }
+
+        uint8_t buffer[256];
+        buffer[0] = flash.readNextByte();
+        buffer[1] = flash.readNextByte();
+        if(buffer[0] != 0xBE || buffer[1] != 0xAF) {
+            Serial.printf("ID incorrect: %02X %02X\n", buffer[0], buffer[1]);
+            ok= false;
+            break;
+        }
+
+        for (int i = 0; i < 5*sizeof(uint16_t); ++i) {
+            buffer[i]= flash.readNextByte();
+        }
+        memcpy(calData, buffer, 5*sizeof(uint16_t));
+        break;
+    }
+
+    flash.endRead();
+    Serial.printf("Loaded calibration data from flash %s\n", ok?"OK":"Failed");
+#endif
+#endif // USE_FLASH
+
     tft.init();
 #else
     tft.begin();
